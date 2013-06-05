@@ -1,0 +1,68 @@
+#!/bin/bash
+# Set up variables and defaults
+OPTIND=1
+pad=3
+i=1
+seperator="-"
+debug=false
+verbose=false
+
+# Process switches
+while getopts ":n:p:s:v" flag ; do
+	case $flag in
+		# Set the zero-padding for the ordering, if specified
+		n)	if $debug ; then printf "Pad:\t$OPTARG\n" ; fi
+			if ! [[ $OPTARG =~ ^[0-9]+$ ]] ; then
+				printf -- "-n: Invalid padding specified; please use an integer \n" >&2
+				exit 64
+			fi
+			pad="$OPTARG"
+			;;
+		# Set the prefix, if specified
+		p)	if $debug ; then printf "Prefix:\t$OPTARG\n" ; fi
+			prefix="$OPTARG"
+			;;
+		# Space-pad the seperator
+		# TODO make this suck less
+		s)	seperator=" $seperator "
+			;;
+		# Flag for verbose mode
+		v)	verbose=true
+			;;
+		# Handle errors with options
+		# TODO: Add usage function
+		?)	printf "Unrecongnized option: $OPTARG" >&2
+			exit 64
+			;;
+	esac
+done
+# Shift off options, $1 is the first non-option arg
+shift $((OPTIND-1))
+
+# Check for non-option arguments
+if [ $# -eq 0 ] ; then	
+	printf "No arguments provided, exiting.\n"
+	# EX_USAGE
+	exit 64
+else
+	argc=$#
+fi
+
+# Set the prefix if one is not specified with -p
+if [ -z $prefix ] ; then
+	prefix=${1%%.*}
+fi
+
+# Move each file specified
+while [ $i -le "$argc" ] ; do
+	old_file="$1"
+	new_file=$(printf -- "${prefix}-%0${pad}d-$1" "$i")
+	if $verbose ; then
+		printf "'$old_file' being renamed '$new_file'\n"
+	fi
+	if ! $debug ; then
+		mv "$old_file" "$new_file"
+	fi
+	i=$((i+1))
+	shift
+done
