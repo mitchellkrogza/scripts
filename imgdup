@@ -1,0 +1,26 @@
+#!/bin/bash
+find_dups()
+{
+	ls -1 |\
+		awk 'BEGIN {FS = ","};
+			{
+				sub(/[a-zA-Z0-9]+-[0-9]+_/,"");
+				sub(/ \([0-9]\)/,"");
+				sub(/\.[a-zA-Z]+/,"")
+				print
+			}'\
+		| sort\
+		| uniq -d
+}
+
+dups="$(find_dups)"
+if [ "$dups" = "" ] ; then
+	printf "No duplicates found!\n"
+	exit 0
+fi
+
+while read line
+do
+	printf "$(ls *${line}*)\n\n"
+done <<< "$dups"
+exit 0

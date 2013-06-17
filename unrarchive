@@ -1,0 +1,12 @@
+#!/bin/bash
+shopt -s extglob
+for zipfile in imgur_*.zip ;
+do
+	printf "Processing $zipfile...\n"
+	unzip -u $zipfile &>/dev/null
+	prefix="${zipfile##imgur_}"
+	prefix="${prefix%%.zip}"
+	rename "s/(.*)/$prefix-\1/" [0-9][0-9][0-9]_*.@(jp?(e)g|gif|png) &>/dev/null
+	rm log.txt $zipfile
+	printf "Processing of $zipfile complete!\n"
+done

@@ -1,0 +1,13 @@
+#!/bin/bash
+trash_dirs=("/home/robert/.local/share/Trash/" "/mnt/eir/.Trash-1000/")
+
+for dir in "${trash_dirs[@]}"; do
+	if [ -d "${dir}files" ]; then
+		rm -r "${dir}files/"*
+		#ls "${dir}files/"*
+	fi
+	if [ -d "${dir}info" ]; then
+		rm -r "${dir}info/"*
+		#ls "${dir}info/"*
+	fi
+done

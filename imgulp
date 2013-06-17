@@ -1,0 +1,74 @@
+#!/bin/bash
+
+basedir=~/Downloads/
+
+function usage()
+{
+	cat << EOF
+Usage $0 [-h] album1 [album2...]
+
+OPTIONS:
+	-h	Display this message and exit
+EOF
+}
+
+if [ $# -eq 0 ] ; then
+	usage
+	exit -1
+fi
+
+while getopts "hv" opt
+do
+	case $opt in
+		h)	usage
+			exit 0
+			;;
+		v)	verbose=0
+			;;
+		?)	usage
+			exit
+			;;
+	esac
+done
+
+# Process all them arguments
+while [ $# -ne 0 ]
+do
+	# See if $1 is an album
+	if [[ $1 =~ (https?://)?imgur.com/a/.* ]] ; then
+		album=${1##*/a/}
+		printf "Fetching album $album\n"
+		dir=$basedir$album
+		mkdir $dir
+		wget -O - $1 | grep -iv "thumb" | sed -n 's;.*data-src="\(.*/.*\.[a-zA-Z0-9]\{3,4\}\)".*;\1;p' \
+			| wget -w 1 --random-wait -i - -P $dir \
+			&& printf "Successfully saved $album to $dir\n" \
+			|| printf "Could not save $album\n"
+
+	# See if $1 is a gallery
+	elif [[ $1 =~ (https?://)?imgur.com/gallery/.* ]] ; then
+		album=${1##*/gallery/}
+		printf "Fetching gallery $album\n"
+		dir=$basedir$album
+		mkdir $dir
+		wget -O - imgur.com/gallery/D9BCD | tr '}' '\n' \
+			| sed -n 's;.*hash":"\([a-zA-Z0-9]*\).*ext":"\(\.[a-zA-Z0-9]*\).*;http://i.imgur.com/\1\2;p' \
+			| wget -w 1 --random-wait -i - -P $dir \
+			&& printf "Successfully saved $album to $dir\n" \
+			|| printf "Could not save $album\n"
+	elif [[ $1 =~ (https?://)?imgur.com/user/.*/submitted ]] ; then
+		album=${1##*/user/}
+		album=${album%%/submitted}
+		printf "Fetching images uploaded by $album"
+		dir=$basedir$album
+		mkdir $dir
+		wget -O - $1 | tr '><' '\n' | sed -n 's;img src="\(.*imgur.*\.[a-zA-Z0-9]\+\)".*;\1;p' \
+			| wget -w 1 --random-wait -i - -P $dir \
+			&& printf "Succesfully saved $album to $dir\n" \
+			|| printf "Could not save $album\n"
+
+	else
+		printf "$1:\tNothing to do here.\n"
+	fi
+	shift
+done
