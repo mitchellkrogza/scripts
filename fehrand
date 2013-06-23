@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my $walldir = "/home/robert/Dropbox/Photos/Wallpapers";
+my @files;
+
+opendir(my $dir, $walldir) or die "Couldn't open directory: $!";
+@files = grep { /^[^.]/ and -f "$walldir/$_" } readdir($dir);
+closedir($dir);
+
+my $index = rand(scalar @files);
+
+exec("DISPLAY=:0 feh --bg-scale ${walldir}/$files[${index}]");

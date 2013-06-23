@@ -2,8 +2,8 @@
 #FreeDNS updater script
 
 logfile=/var/log/freedns
-updateurl="http://freedns.afraid.org/dynamic/update.php?VURyMkw2MzFVMVVBQUtrSTlhd0FBQUFFOjg5MjMzMzA="
-domain="YOURDOMAINHERE"
+updateurl="UPDATE_URL_HERE"
+domain="YOUR_DOMAIN_HERE"
 
 registered=$(nslookup $domain|tail -n2|grep A|sed s/[^0-9.]//g)
 
