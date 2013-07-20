@@ -1,12 +1,31 @@
-#!/bin/bash
-shopt -s extglob
-for zipfile in imgur_*.zip ;
-do
-	printf "Processing $zipfile...\n"
-	unzip -u $zipfile &>/dev/null
-	prefix="${zipfile##imgur_}"
-	prefix="${prefix%%.zip}"
-	rename "s/(.*)/$prefix-\1/" [0-9][0-9][0-9]_*.@(jp?(e)g|gif|png) &>/dev/null
-	rm log.txt $zipfile
-	printf "Processing of $zipfile complete!\n"
-done
+#!/usr/bin/perl
+use strict;
+use warnings;
+use IO::Uncompress::Unzip qw(unzip $UnzipError);
+
+my @zipfiles = glob("imgur_*.zip");
+
+foreach my $archive (@zipfiles)
+{
+	printf "Processing $archive...\n";
+	(my $prefix = $archive) =~ s/imgur_(.*)\.zip/$1/;
+	printf "Zipfile: $archive\nPrefix: $prefix\n";
+
+	my $unzip = new IO::Uncompress::Unzip $archive
+		or die "Cannot open $archive: $UnzipError\n";
+
+	die "Zip file has no headers"
+		if ! defined $unzip->getHeaderInfo;
+
+	for (my $status = 1; $status > 0; $status = $unzip->nextStream)
+	{
+		my $file = $unzip->getHeaderInfo->{Name};
+		unless ($file eq "log.txt")
+		{
+			unzip $archive => "./$prefix-$file"
+				or die "Unzip failed: $UnzipError\n";
+		}
+	}
+	unlink($archive);
+	printf "Processing of $archive complete!\n";
+}
