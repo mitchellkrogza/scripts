@@ -9,21 +9,29 @@ foreach my $archive (@zipfiles)
 {
 	printf "Processing $archive...\n";
 	(my $prefix = $archive) =~ s/imgur_(.*)\.zip/$1/;
-	printf "Zipfile: $archive\nPrefix: $prefix\n";
 
 	my $unzip = new IO::Uncompress::Unzip $archive
 		or die "Cannot open $archive: $UnzipError\n";
 
 	die "Zip file has no headers"
-		if ! defined $unzip->getHeaderInfo;
+		unless defined $unzip->getHeaderInfo;
 
 	for (my $status = 1; $status > 0; $status = $unzip->nextStream)
 	{
-		my $file = $unzip->getHeaderInfo->{Name};
-		unless ($file eq "log.txt")
+		my $src_file = $unzip->getHeaderInfo->{'Name'};
+		
+		unless ($src_file eq "log.txt")
 		{
-			unzip $archive => "./$prefix-$file"
-				or die "Unzip failed: $UnzipError\n";
+			my $dst_file = "$prefix-$src_file";
+			my $fh = IO::File->new("$dst_file", "w");
+
+			my $buff;
+			while(($status = $unzip->read($buff)) > 0)
+			{
+				$fh->write($buff);
+			}
+
+			last if $status < 0 ;
 		}
 	}
 	unlink($archive);
