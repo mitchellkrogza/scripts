@@ -34,6 +34,7 @@ foreach my $archive (@zipfiles)
 			last if $status < 0 ;
 		}
 	}
-	unlink($archive);
+	unlink("$archive");
+	unlink("${prefix}-captions.txt");
 	printf "Processing of $archive complete!\n";
 }
