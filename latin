@@ -117,6 +117,6 @@ sub verbs
 		}
 	}
 
-	# Return the cross product of the selected verb arrays
+	# Return the cartesian product of the selected verb arrays
 	return shuffle cartesian {1} $persons, $number, $tenses, $selectedVoice, $selectedMood;
 }
