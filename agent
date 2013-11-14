@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Choose my key
+ssh_key="/home/robert/.ssh/id_rsa"
+
+# Check to see if there is an agent running
+if [ -S "$SSH_AUTH_SOCK" -a "$SSH_AGENT_PID" ] ; then 
+	ssh-add -l &> /dev/null
+	# ssh-add -l returns 1 if there are no keys loaded
+	if [ $? -eq 1 ] ; then
+		# So add it
+		ssh-add "$ssh_key"
+	fi
+# No agent running, start one and load the key
+else
+	ssh-agent && ssh-add "$ssh_key"
+fi
