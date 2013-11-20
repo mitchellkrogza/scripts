@@ -1,0 +1,88 @@
+#!/bin/sh
+
+function usage()
+{
+	# If we've gotten to usage, ignore the outfile. Restore stdout and print
+	# the help message
+	if [ -t "6" ] ; then
+		exec 1>&6
+		exec 6>&-
+	fi
+	cat << EOF
+Usage: $0 [OPTION]... FILE1 [FILE2]...
+Takes NARF People By Position reports and creates a list for mailman
+
+	-h, --help	Prints this message and exits
+	-o, --outfile	Speciefies file to write
+EOF
+	exit 0
+}
+
+function check_file()
+{
+	local file="$1"
+	
+	if [ -r "$file" ] ; then
+		files+=( "$file" )
+	else
+		printf "Could not read $file. Fuck me, right?\n"
+		exit 1
+	fi
+}
+
+## Main
+# Get options
+while true ; do
+	case "$1" in
+		-h|--help)
+			usage
+			;;
+		-o|--outfile)
+			if [ -n "$2" ] ; then
+				# Save stdout to FD
+				exec 6>&1
+				# Redirect stdout to the specified output file
+				exec > "$2"
+				# Shift off -o file
+				shift 2
+			else
+				printf "Error: No output file specified\n" >&2
+				usage
+			fi
+			break
+			;;
+		-*) # We've run into some option that isn't implemented
+			printf "Unknown option: $1\n" >&2
+			usage
+			;;
+		*)	# No more options, get out of the loop
+			break
+			;;
+	esac
+done
+
+# Array of files to be processed
+files=()
+
+# Check to make sure we can read all the files passed to us
+for file in "$@" ; do
+	check_file "$file"
+done
+
+if [ ${#files[@]} -eq 0 ] ; then
+	printf "Error: No input files specified.\n" >&2
+	usage
+fi
+
+# We expect the first four lines to be header garbage from the report, so start
+# on the fifth line. We also expect the username to be column 3 and the hall
+# name to be column 5.
+tail -n +5 "${files[@]}" |	# Ignore the header of each file
+sort -u -t , -k5,5 -k3,3 |	# Sort by HALL then NAME
+awk -F , 'BEGIN { hall="" }
+	{ 
+		if ( $5 != hall && hall != "" ) { print "\n#" $5 };
+		if ( $5 != hall && hall == "" ) { print "#" $5 };
+		if ( $3 != "" ) { print $3 "@uwosh.edu"; hall=$5 };
+	}' 	# Every time we see a new hall, print out the hall name as a comment.
+		# Print every username with @uwosh.edu appended to it. Pray.
