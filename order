@@ -56,7 +56,7 @@ fi
 # Move each file specified
 while [ $i -le "$argc" ] ; do
 	old_file="$1"
-	new_file=$(printf -- "${prefix}-%0${pad}d-$1" "$i")
+	new_file=$(printf -- "${prefix}-%0${pad}d_$1" "$i")
 	if $verbose ; then
 		printf "'$old_file' being renamed '$new_file'\n"
 	fi

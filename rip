@@ -1,0 +1,14 @@
+#!/bin/sh
+
+while read line; do
+	~/vcs/rip/rip.py "$line"
+done < "$1"
+
+for album in ./rips/*; do
+	prefix="${album##./rips/imgur_}"
+	for file in $album/*; do
+		mv "$file" "$HOME/Downloads/$prefix-$(basename $file)"
+	done
+	rm -r "$album"
+done
+rm -r "./rips"
