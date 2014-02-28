@@ -1,0 +1,5 @@
+#!/bin/sh
+dt_dir="/home/robert/Games/dwarftherapist"
+dt_bin="DwarfTherapist"
+cd "$dt_dir"
+"$dt_dir/$dt_bin"
