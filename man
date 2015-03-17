@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -t 1 ] ; then
+	export MANROFFOPT="-c $MANROFFOPT"
+	export MANPAGER="bash -c \"vim -c 'set ft=man' </dev/tty <(col -b -x)\""
+else
+	export MANPAGER='less -s'
+fi
+
+/usr/bin/man "$@"
