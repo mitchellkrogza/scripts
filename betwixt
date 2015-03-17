@@ -1,0 +1,100 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Getopt::Long;
+
+Getopt::Long::Configure("gnu_getopt");
+GetOptions	(
+				'a|append=s'	=>	\(my $afile),		
+				'e|exclusive'	=>	\(my $exc = 0),		
+				'h|help'		=>	\(my $help = 0),	
+				'l|limit=i'		=>	\(my $limit = ~0>>1), 
+				'p|prepend=s'	=>	\(my $pfile),		
+				'v|verbose'		=>	\(my $verbose = 0),	
+			) or (usage() and exit 1);
+
+usage() and exit 0 if $help;
+
+# Get the start and end patterns
+my $start = shift;
+my $end = shift;
+# You've done something dumb
+exit 0 if ($start eq $end and $exc);
+
+# Is there a file argument or are we reading from STDIN?
+my $infile = shift;
+my $fh;
+if ($infile) {
+	open($fh, '<', $infile) or die $!;
+} else {
+	$fh = *STDIN
+}
+
+# Set up any lines to be prepended or appended
+my @append = read_file($afile) if $afile;
+my @prepend = read_file($pfile) if $pfile;
+
+# Actually do the thing
+my $count = 0;
+my $flag = 0;
+while (<$fh>) {
+	if (!$flag and m;$start;) {
+		$flag = 1;
+		$count++;
+		printf ">===Section %d===<\n", $count if $verbose;
+		print_array(@prepend) if @prepend;
+		next if $exc;
+	}
+
+	if ($flag and (m;$end; or eof)) {
+		$flag = 0;
+		print unless $exc;
+		print_array(@append) if @append;
+		last unless $count < $limit;
+		print "\n" if $verbose and !eof;
+		next;
+	}
+
+	print if $flag;
+}
+close $fh;
+
+### Functions
+# Read all the lines of $_[0] into an array
+sub read_file
+{
+	my $file = shift;
+	open(my $fh, '<', $file) or die $!;
+
+	my @lines;
+	while (<$fh>) {
+		push @lines, $_;
+	}
+	close $fh;
+	return @lines;
+}
+
+# Print the contents of array
+sub print_array
+{
+	foreach (@_) {
+		print;
+	}
+}
+
+# Print help
+sub usage
+{
+	print qq{
+Usage: $0 [OPTION]... START END [FILE]
+Print all sections between pairs of START and END in FILE or standard input.
+START and END are arbitrary perl regular expressions.
+
+Mandatory arguments to long options are mandatory for short options too.
+    -a, --append=FILE         Append contents of FILE to each matched section
+    -e, --exclusive           Do not output START or END when matchin sections
+    -h, --help                Display this help and exit
+    -l, --limit=N             Limit the number of sections printed to N
+    -p, --prepend=FILE        Prepend contents of FILE to each matched section
+    -v, --verbose             Print a header between each section\n};
+}
