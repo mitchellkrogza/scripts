@@ -13,7 +13,7 @@ GetOptions	(
 				'v|verbose'		=>	\(my $verbose = 0),	
 			) or (usage() and exit 1);
 
-usage() and exit 0 if $help;
+usage() and exit 0 if ($help or not @ARGV);
 
 # Get the start and end patterns
 my $start = shift;
