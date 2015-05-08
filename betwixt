@@ -3,12 +3,15 @@ use strict;
 use warnings;
 use Getopt::Long;
 
+# Simulate C's MAX_INT
+use constant MAX_INT => ~0>>1;
+
 Getopt::Long::Configure("gnu_getopt");
 GetOptions	(
 				'a|append=s'	=>	\(my $afile),		
 				'e|exclusive'	=>	\(my $exc = 0),		
 				'h|help'		=>	\(my $help = 0),	
-				'l|limit=i'		=>	\(my $limit = ~0>>1), 
+				'l|limit=i'		=>	\(my $limit = MAX_INT),
 				'p|prepend=s'	=>	\(my $pfile),		
 				'v|verbose'		=>	\(my $verbose = 0),	
 			) or (usage() and exit 1);
@@ -92,7 +95,7 @@ START and END are arbitrary perl regular expressions.
 
 Mandatory arguments to long options are mandatory for short options too.
     -a, --append=FILE         Append contents of FILE to each matched section
-    -e, --exclusive           Do not output START or END when matchin sections
+    -e, --exclusive           Do not output starting and ending boundary lines
     -h, --help                Display this help and exit
     -l, --limit=N             Limit the number of sections printed to N
     -p, --prepend=FILE        Prepend contents of FILE to each matched section
