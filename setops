@@ -1,0 +1,44 @@
+#!/bin/bash
+
+set_diff()
+{
+	local left=$(<"$1")
+	shift
+
+	while (($#)) ; do
+		left="$(echo "$left" | sort - "$1" "$1" | uniq -u)"
+		shift
+	done
+	printf "%s\n" "$left"
+}
+
+set_inter()
+{
+	local left=$(<"$1")
+	shift
+
+	while (($#)) ; do
+		left="$(echo "$left" | sort - "$1" | uniq -d)"
+		shift
+	done
+	printf "%s\n" "$left"
+}
+
+prog="$(basename "$0")"
+if (($# < 2)) ; then
+	echo "$prog: too few arguments\n" >&2
+	exit 1
+fi
+
+case "$prog" in
+	'setd')
+		set_diff "$@"
+		;;
+	'seti')
+		set_inter "$@"
+		;;
+	'setu')
+		sort $sort_opts "$@" | uniq
+		;;
+esac
+exit $?
