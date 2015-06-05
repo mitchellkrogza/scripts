@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for module in "$@" ; do
+	printf '%s => ' "$module"
+	perldoc -l "$module"
+done

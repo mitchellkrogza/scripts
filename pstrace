@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my $pid = shift;
+chomp (my @ps = qx(ps --no-header -eo pid,ppid,args));
+get_parent($pid);
+
+sub get_parent
+{
+	my $search = shift;
+	return if ($search < 1);
+
+	for (@ps) {
+		my ($pid, $ppid, $cmd) = /([0-9]+)\s+([0-9]+)\s+(.{1,150})/;
+		next if ($pid != $search);
+		get_parent($ppid);
+		printf "%-10d%s\n", $pid, $cmd;
+	}
+}
