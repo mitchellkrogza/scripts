@@ -2,19 +2,32 @@
 use strict;
 use warnings;
 
-my $pid = shift;
 chomp (my @ps = qx(ps --no-header -eo pid,ppid,args));
-get_parent($pid);
+
+	my %procs;
+	for (@ps) {
+		my ($pid, $ppid, $cmd) = /([0-9]+)\s+([0-9]+)\s+(.{1,150})/;
+		$procs{$pid}{$ppid} = $cmd;
+	}
+
+while (@ARGV) {
+	my $find = shift;
+	if ($procs{$find}) {
+		get_parent($find);
+	} else {
+		printf STDERR "No such process: %d\n", $find;
+	}
+	print "\n" if ($#ARGV + 1);
+}
 
 sub get_parent
 {
-	my $search = shift;
-	return if ($search < 1);
+	my $pid = shift;
+	return if ($pid < 1);
 
-	for (@ps) {
-		my ($pid, $ppid, $cmd) = /([0-9]+)\s+([0-9]+)\s+(.{1,150})/;
-		next if ($pid != $search);
-		get_parent($ppid);
-		printf "%-10d%s\n", $pid, $cmd;
-	}
+	# Each PID has exactly one PPID
+	my $ppid = (keys %{ $procs{$pid} })[0];
+	my $cmd = ($procs{$pid}{$ppid});
+	get_parent($ppid);
+	printf "%-10d%s\n", $pid, $cmd;
 }
