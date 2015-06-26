@@ -4,11 +4,11 @@ use warnings;
 
 chomp (my @ps = qx(ps --no-header -eo pid,ppid,args));
 
-	my %procs;
-	for (@ps) {
-		my ($pid, $ppid, $cmd) = /([0-9]+)\s+([0-9]+)\s+(.{1,150})/;
-		$procs{$pid}{$ppid} = $cmd;
-	}
+my %procs;
+for (@ps) {
+	my ($pid, $ppid, $cmd) = /([0-9]+)\s+([0-9]+)\s+(.{1,150})/;
+	$procs{$pid}{$ppid} = $cmd;
+}
 
 while (@ARGV) {
 	my $find = shift;
