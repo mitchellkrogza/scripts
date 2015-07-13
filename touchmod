@@ -1,0 +1,12 @@
+#!/bin/bash
+
+mode="$1"
+shift
+
+touch "$@"
+
+files=()
+for arg in "$@" ; do
+	[ -f "$arg" ] && files+=("$arg")
+done
+chmod "$mode" "${files[@]}"
