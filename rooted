@@ -1,0 +1,11 @@
+#!/bin/echo This file is useless unless sourced: .
+# File to be sourced in rootsh to get a sane environment
+
+# If we're called with an argument, use it for SSH_CLIENT
+[ -n "$1" -a -z "$SSH_CLIENT" ] && export SSH_CLIENT="$1"
+
+# Store the path to my actual home directory
+export HOME=$(echo ~robertwd)
+
+# Source my bashrc
+source ~/.bashrc
