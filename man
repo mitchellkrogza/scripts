@@ -1,8 +1,13 @@
 #!/bin/bash
 
+rc="$HOME/.vimrc"
+opts=(-n -c 'set ft=man' )
+[ -r "$rc" ] && opts=( -u "$rc" "${opts[@]}")
+export opts
+
 if [ -t 1 ] ; then
 	export MANROFFOPT="-c $MANROFFOPT"
-	export MANPAGER="/bin/bash -c \"vim -nc 'set ft=man' </dev/tty <(col -b -x)\""
+	export MANPAGER="/bin/bash -c \"vim $(printf "'%s' " "${opts[@]}") </dev/tty <(col -b -x)\""
 else
 	export MANPAGER='less -s'
 fi
