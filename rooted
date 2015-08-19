@@ -5,7 +5,7 @@
 [ -n "$1" -a -z "$SSH_CLIENT" ] && export SSH_CLIENT="$1"
 
 # Store the path to my actual home directory
-export HOME=$(echo ~robert)
+export HOME="$(echo ~robert)"
 
 # Source my bashrc
 source ~/.bashrc

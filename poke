@@ -4,15 +4,20 @@ trap exit SIGTERM SIGSTOP
 host="$1"
 
 if ping -c 1 -w 1 "$host" > /dev/null 2>&1 ; then
-	printf 'Waiting for host %s to stop responding...\n' "$host"
+	printf 'Waiting for host %s to stop responding...' "$host"
 	while true ; do
 		ping -c 1 -w 1 "$host" > /dev/null 2>&1 || break
+		echo -n .
+		sleep 1
 	done
-	sleep 10
+	echo ''
 fi
-printf 'Host %s is down...\n' "$host"
 
+printf 'Host %s is down...' "$host"
 while true ; do
 	ping -c 1 -w 1 "$host" > /dev/null 2>&1 && break
+	echo -n .
+	sleep 1
 done
-printf 'Host %s is up!\n' "$host"
+
+printf '\nHost %s is up!\n' "$host"
