@@ -2,7 +2,7 @@
 
 rc="$HOME/.vimrc"
 opts=(-n -c 'set ft=man' )
-[ -r "$rc" ] && opts=( -u "$rc" "${opts[@]}")
+[ -r "$rc" ] && opts=( '-u' "$rc" "${opts[@]}")
 export opts
 
 if [ -t 1 ] ; then
