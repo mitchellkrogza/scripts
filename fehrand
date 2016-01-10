@@ -1,14 +1,16 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+use File::Find;
 
-my $walldir = "/home/robert/Dropbox/Photos/Wallpapers";
+my $walldir = "$ENV{HOME}/Dropbox/Photos/Wallpapers";
 my @files;
+find({ wanted => \&push_file, no_chdir => 1 }, $walldir);
 
-opendir(my $dir, $walldir) or die "Couldn't open directory: $!";
-@files = grep { /^[^.]/ and -f "$walldir/$_" } readdir($dir);
-closedir($dir);
+my $index = int(rand(@files));
+exec("DISPLAY=:0 feh --bg-scale $files[${index}]");
 
-my $index = rand(scalar @files);
-
-exec("DISPLAY=:0 feh --bg-scale ${walldir}/$files[${index}]");
+sub push_file
+{
+	push @files, $_ if -f $_;
+}
