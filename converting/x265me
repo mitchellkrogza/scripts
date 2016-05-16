@@ -1,0 +1,89 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use sigtrap qw{handler wait_kill USR1};
+
+my $PID;
+while (<>) {
+
+	chomp (my $file = $_);
+	my $fname = '';
+	my $fext = '';
+	if (/(.+)\.(.+?)$/) {
+		$fname = $1;
+		$fext = $2;
+	}
+
+	if (not ($fname and $fext)) {
+		warn "Could not parse '$file', skipping\n";
+		next;
+	}
+
+	my $ext = 'mkv';
+	if ($fext eq $ext) {
+		$ext = "x265.$ext";
+	}
+
+	my $height = get_height($file);
+	if (not $height) {
+		warn "Could not get height for '$file', skipping\n";
+		next;
+	}
+
+	my $scale = get_scale($file);
+
+	$PID = convert($file, "$fname.$ext", $scale);
+	waitpid $PID, 0;
+
+	# Give things a few seconds
+	print "\n\nSleeping for a few seconds...\n";
+	sleep 2;
+	print "Going to the next file\n";
+}
+
+sub get_scale
+{
+	my $file = shift;
+	my $height = get_height($file);
+
+	if ($height > 720) {
+		return qq{-vf 'scale=-1:720'};
+	}
+	return '';
+}
+
+sub get_height
+{
+	my $file = shift;
+
+	my $height = 0;
+	my @out = qx{ffprobe -v error -of csv -select_streams v:0 -show_entries stream=height "$file"};
+	for (@out) {
+		if (/stream,([0-9]+)/) {
+			return $1;
+		}
+	}
+}
+
+sub convert
+{
+	my $ofile = shift;
+	my $nfile = shift;
+	my $scale = shift;
+
+	my $pid = fork;
+	if (not $pid) {
+		$SIG{USR1} = 'IGNORE';
+		exec qq{ffmpeg -i "$ofile" -vcodec libx265 -acodec copy $scale -crf 20 -preset slower "$nfile" </dev/null};
+	}
+	printf "Converting %s to %s in PID %d\n\n", $ofile, $nfile, $pid;
+	return $pid;
+}
+
+sub wait_kill
+{
+	printf "\nCaught signal, waiting for current conversion %d to exit...\n", $PID;
+	waitpid $PID, 0;
+	printf "Child %d has exited, bailing out\n", $PID;
+	exit 0;
+}

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+optgm='/opt/gmusic'
+cmd="$optgm/gmusicapi-scripts/gmusicapi_scripts/$(basename "$0")"
+
+. "$optgm/bin/activate"
+python "$cmd.py" "$@"
