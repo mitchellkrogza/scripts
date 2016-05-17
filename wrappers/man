@@ -1,7 +1,8 @@
 #!/bin/bash
 
+me="$(basename "$(echo "$0")")"
 rc="$HOME/.vimrc"
-opts=(-n -c 'set ft=man' )
+opts=( -n -c 'set ft=man' )
 [ -r "$rc" ] && opts=( '-u' "$rc" "${opts[@]}")
 export opts
 
@@ -12,4 +13,4 @@ else
 	export MANPAGER='less -s'
 fi
 
-/usr/bin/man "$@"
+exec "/usr/bin/$me" "$@"

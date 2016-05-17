@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use File::Basename qw(basename);
+use Getopt::Long;
+use String::Escape qw(unbackslash);
+
+GetOptions	(
+				'n|newline'	=> \(my $nl = 0),
+			) or exit(1);
+
+my $me = basename $0;
+my $sep;
+if ($me eq 'pfc') {
+	$sep = ',';
+} elsif ($me eq 'pfn') {
+	$sep = "\n";
+} elsif ($me eq 'pfz') {
+	$sep = "\0";
+} else {
+	usage(1) if ($#ARGV < 1);
+	($sep = shift) =~ s/\\0/\0/g;
+	$sep = unbackslash $sep;
+}
+
+printf "%s", (join $sep, @ARGV);
+print "\n" if $nl;

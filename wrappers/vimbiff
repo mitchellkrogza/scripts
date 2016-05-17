@@ -1,0 +1,9 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my @args = ();
+for $file (@ARGV) {
+	push @args, qq{<('$file')};
+}
+exec ('vimdiff', @args);
