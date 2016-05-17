@@ -1,5 +1,5 @@
 #!/bin/bash
-trap exit SIGTERM SIGSTOP
+trap exit SIGINT SIGTSTP
 
 host="$1"
 

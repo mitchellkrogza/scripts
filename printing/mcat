@@ -1,8 +1,8 @@
 #!/bin/bash
 for arg in "$@" ; do
-    printf '==> %s <==\n' "$arg"
-    cat "$arg"
+	printf '==> %s <==\n' "$arg"
+	cat "$arg"
 
-    shift
-    [ -z "$*" ] || printf '\n'
+	shift
+	[ -z "$*" ] || printf '\n'
 done

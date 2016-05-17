@@ -6,6 +6,7 @@
 
 # Store the path to my actual home directory
 export HOME="$(echo ~robert)"
+cd "$HOME"
 
 # Source my bashrc
-source ~/.bashrc
+source "$HOME/.bashrc"
